@@ -141,8 +141,8 @@ describe("requiresHumanReview / documentExpiryAlerts", () => {
     expect(requiresHumanReview(["DOCUMENT_EXPIRED"])).toBe(true);
   });
 
-  it("documentExpiryAlerts surfaces seeded expired/expiring documents", () => {
-    const alerts = documentExpiryAlerts(new Date());
+  it("documentExpiryAlerts surfaces seeded expired/expiring documents", async () => {
+    const alerts = await documentExpiryAlerts(new Date());
     expect(Array.isArray(alerts)).toBe(true);
     expect(alerts.some((a) => a.status === "EXPIRED" || a.status === "EXPIRING_SOON")).toBe(true);
   });

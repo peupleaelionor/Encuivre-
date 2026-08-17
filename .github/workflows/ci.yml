@@ -29,7 +29,11 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Unit tests
+      - name: Unit + DB integration tests
+        # DB/permission tests run against PGlite (embedded Postgres) — no service
+        # container or secret required. See docs/database.md.
+        env:
+          ENCUIVRE_DB_PATH: ":memory:"
         run: npm test
 
       - name: Build

@@ -1,10 +1,10 @@
 /**
- * Repository abstraction over the data source.
+ * Repository abstraction over the data source (now asynchronous, PostgreSQL-backed).
  *
- * V1 backs this with the in-repo typed seed dataset (lib/seed). The interface is
- * deliberately narrow and synchronous-friendly so a real async database
- * (Prisma/Postgres) can replace `SeedRepository` later without touching the UI
- * or the engines. See docs/copilot-audit.md ("Dette volontaire").
+ * The read/write contract is the single seam between the app and persistence.
+ * `repo` is the Postgres (Drizzle) implementation; PGlite in dev/test, real
+ * Postgres in production (see lib/db/*). Business engines never import the ORM —
+ * they receive plain data (Sprint §15).
  */
 
 import type {
@@ -18,65 +18,41 @@ import type {
   SellOffer,
   TrackedDocument,
 } from "./types";
-import * as seed from "./seed";
 
+/** Read side of the data source. */
 export interface Repository {
-  companies(): Company[];
-  company(id: string): Company | undefined;
-  contacts(): Contact[];
-  sellOffers(): SellOffer[];
-  buyRequests(): BuyRequest[];
-  deals(): Deal[];
-  deal(id: string): Deal | undefined;
-  documents(): TrackedDocument[];
-  followUps(): FollowUp[];
-  quotes(): Quote[];
-  decisions(): Decision[];
+  companies(): Promise<Company[]>;
+  company(id: string): Promise<Company | undefined>;
+  contacts(): Promise<Contact[]>;
+  sellOffers(): Promise<SellOffer[]>;
+  buyRequests(): Promise<BuyRequest[]>;
+  deals(): Promise<Deal[]>;
+  deal(id: string): Promise<Deal | undefined>;
+  documents(): Promise<TrackedDocument[]>;
+  followUps(): Promise<FollowUp[]>;
+  quotes(): Promise<Quote[]>;
+  decisions(): Promise<Decision[]>;
 }
 
-class SeedRepository implements Repository {
-  companies() {
-    return seed.companies;
-  }
-  company(id: string) {
-    return seed.companies.find((c) => c.id === id);
-  }
-  contacts() {
-    return seed.contacts;
-  }
-  sellOffers() {
-    return seed.sellOffers;
-  }
-  buyRequests() {
-    return seed.buyRequests;
-  }
-  deals() {
-    return seed.deals;
-  }
-  deal(id: string) {
-    return seed.deals.find((d) => d.id === id);
-  }
-  documents() {
-    return seed.documents;
-  }
-  followUps() {
-    return seed.followUps;
-  }
-  quotes() {
-    return seed.quotes;
-  }
-  decisions() {
-    return seed.decisions;
-  }
+/** Write side — kept minimal and explicit. */
+export interface WritableRepository extends Repository {
+  createSellOffer(input: Omit<SellOffer, "id" | "createdAt">): Promise<SellOffer>;
+  createBuyRequest(input: Omit<BuyRequest, "id" | "createdAt">): Promise<BuyRequest>;
+  createDeal(input: Omit<Deal, "id" | "createdAt">): Promise<Deal>;
+  createQuote(input: Omit<Quote, "id" | "createdAt">): Promise<Quote>;
+  createDecision(input: Omit<Decision, "id" | "createdAt">): Promise<Decision>;
+  updateDealStage(id: string, stage: Deal["stage"]): Promise<Deal | undefined>;
 }
 
-export const repo: Repository = new SeedRepository();
+import { pgRepository } from "./db/repository";
 
-// Convenience re-exports for company-role filtering.
-export function suppliers(r: Repository = repo): Company[] {
-  return r.companies().filter((c) => c.role === "SUPPLIER" || c.role === "BOTH");
+export const repo: WritableRepository = pgRepository;
+
+// Convenience role filters (async).
+export async function suppliers(r: Repository = repo): Promise<Company[]> {
+  return (await r.companies()).filter((c) => c.role === "SUPPLIER" || c.role === "BOTH");
 }
 
-export function buyers(r: Repository = repo): Company[] {
-  return r.companies().filter((c) => c.role === "BUYER" || c.role === "BOTH");
+export async function buyers(r: Repository = repo): Promise<Company[]> {
+  return (await r.companies()).filter((c) => c.role === "BUYER" || c.role === "BOTH");
 }

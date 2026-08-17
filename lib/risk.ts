@@ -23,13 +23,13 @@ export interface DocumentExpiryAlert {
 }
 
 /** Documents expired or expiring within `soonDays`. */
-export function documentExpiryAlerts(
+export async function documentExpiryAlerts(
   now: Date = new Date(),
   soonDays = 30,
   r: Repository = repo,
-): DocumentExpiryAlert[] {
+): Promise<DocumentExpiryAlert[]> {
   const alerts: DocumentExpiryAlert[] = [];
-  for (const doc of r.documents()) {
+  for (const doc of await r.documents()) {
     if (!doc.expiryDate) continue;
     const days = Math.floor((new Date(doc.expiryDate).getTime() - now.getTime()) / DAY_MS);
     if (days < 0) {

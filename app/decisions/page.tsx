@@ -9,8 +9,8 @@ const STATUS_COLOR: Record<string, string> = {
   CLOSED: "var(--green)",
 };
 
-export default function DecisionsPage() {
-  const decisions = repo.decisions();
+export default async function DecisionsPage() {
+  const decisions = await repo.decisions();
 
   return (
     <div className="space-y-6">

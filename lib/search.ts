@@ -18,12 +18,20 @@ export interface SearchHit {
 
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-export function globalSearch(query: string, r: Repository = repo): SearchHit[] {
+export async function globalSearch(query: string, r: Repository = repo): Promise<SearchHit[]> {
   const q = norm(query.trim());
   if (!q) return [];
   const hits: SearchHit[] = [];
 
-  for (const c of r.companies()) {
+  const [allCompanies, allContacts, allDeals, allOffers, allRequests] = await Promise.all([
+    r.companies(),
+    r.contacts(),
+    r.deals(),
+    r.sellOffers(),
+    r.buyRequests(),
+  ]);
+
+  for (const c of allCompanies) {
     if (norm(`${c.displayName} ${c.legalName} ${c.country}`).includes(q)) {
       hits.push({
         kind: "company",
@@ -35,7 +43,7 @@ export function globalSearch(query: string, r: Repository = repo): SearchHit[] {
     }
   }
 
-  for (const ct of r.contacts()) {
+  for (const ct of allContacts) {
     if (norm(`${ct.name} ${ct.role ?? ""} ${ct.email ?? ""}`).includes(q)) {
       hits.push({
         kind: "contact",
@@ -59,13 +67,13 @@ export function globalSearch(query: string, r: Repository = repo): SearchHit[] {
     }
   }
 
-  for (const d of r.deals()) {
+  for (const d of allDeals) {
     if (norm(`${d.title} ${d.stage} ${MATERIAL_LABELS[d.material]}`).includes(q)) {
       hits.push({ kind: "deal", id: d.id, title: d.title, subtitle: `Deal · ${d.stage}`, href: "/focus" });
     }
   }
 
-  for (const o of r.sellOffers()) {
+  for (const o of allOffers) {
     if (norm(`${MATERIAL_LABELS[o.material]} ${o.location} ${o.country}`).includes(q)) {
       hits.push({
         kind: "offer",
@@ -77,7 +85,7 @@ export function globalSearch(query: string, r: Repository = repo): SearchHit[] {
     }
   }
 
-  for (const br of r.buyRequests()) {
+  for (const br of allRequests) {
     if (norm(`${MATERIAL_LABELS[br.material]} ${br.location} ${br.country}`).includes(q)) {
       hits.push({
         kind: "request",
