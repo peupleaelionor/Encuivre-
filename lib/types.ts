@@ -85,6 +85,10 @@ export interface BuyerMetrics {
 
 export interface Company {
   id: string;
+  /** Tenant that owns this CRM record (usually EN CUIVRE INTERNAL). */
+  ownerOrganizationId?: string;
+  /** If this counterparty has its own login account/portal, its organization id. */
+  accountOrganizationId?: string;
   legalName: string;
   displayName: string;
   role: CompanyRole;

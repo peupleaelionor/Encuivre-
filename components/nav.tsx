@@ -49,6 +49,7 @@ const MOBILE: { href: string; label: string }[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  if (pathname === "/login") return null;
   return (
     <aside className="hidden w-64 shrink-0 border-r p-4 md:block" style={{ borderColor: "var(--border)" }}>
       <Link href="/ceo" className="mb-6 block">
@@ -91,6 +92,7 @@ export function Sidebar() {
 
 export function MobileBar() {
   const pathname = usePathname();
+  if (pathname === "/login") return null;
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-10 flex border-t md:hidden"

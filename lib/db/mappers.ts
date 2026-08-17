@@ -41,6 +41,8 @@ const u = <T>(v: T | null | undefined): T | undefined => (v == null ? undefined 
 export function rowToCompany(r: CompanyRow): Company {
   return {
     id: r.id,
+    ownerOrganizationId: u(r.ownerOrganizationId),
+    accountOrganizationId: u(r.accountOrganizationId),
     legalName: r.legalName,
     displayName: r.displayName,
     role: r.role,
