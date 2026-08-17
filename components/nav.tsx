@@ -10,6 +10,7 @@ const SECTIONS: { label: string; items: { href: string; label: string }[] }[] = 
       { href: "/ceo", label: "CEO Command Center" },
       { href: "/focus", label: "Focus — 3 priorités" },
       { href: "/follow-ups", label: "Relances & alertes" },
+      { href: "/documents", label: "Documents" },
     ],
   },
   {

@@ -9,6 +9,7 @@ import { calculateDealPriorityScore } from "./deal-score";
 import { scoreSupplierCompany } from "./supplier-score";
 import { scoreBuyerCompany } from "./buyer-score";
 import { bucketFollowUps, deriveDealAlerts, type DealAlert } from "./follow-ups";
+import { deriveRiskFlags } from "./risk";
 import { repo, type Repository } from "./store";
 import type { Deal, ScoredDeal } from "./types";
 
@@ -187,6 +188,27 @@ export function allDealAlerts(now: Date = new Date(), r: Repository = repo): Dea
 
 export function followUpBuckets(now: Date = new Date(), r: Repository = repo) {
   return bucketFollowUps(r.followUps(), now);
+}
+
+export interface DealReview {
+  dealId: string;
+  title: string;
+  reasons: string[];
+}
+
+/** Open deals whose derived risk flags force a human review (Step 21). */
+export function dealsNeedingReview(now: Date = new Date(), r: Repository = repo): DealReview[] {
+  const reviews: DealReview[] = [];
+  const docs = r.documents();
+  for (const deal of r.deals().filter(isOpen)) {
+    const company = deal.supplierId ? r.company(deal.supplierId) : r.company(deal.buyerId);
+    const dealDocs = docs.filter((d) => d.dealId === deal.id);
+    const assessment = deriveRiskFlags({ company, deal, trackedDocuments: dealDocs, now });
+    if (assessment.humanReviewRequired) {
+      reviews.push({ dealId: deal.id, title: deal.title, reasons: assessment.reasons });
+    }
+  }
+  return reviews;
 }
 
 // ---- local formatting (kept here to avoid importing client-only helpers) ----
