@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Empty, Kpi, LevelBadge, Panel } from "@/components/ui";
-import { ceoKpis, todayActions, allDealAlerts } from "@/lib/dashboard";
+import { ceoKpis, todayActions, allDealAlerts, dealsNeedingReview } from "@/lib/dashboard";
 import { documentExpiryAlerts } from "@/lib/risk";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +11,7 @@ export default function CeoPage() {
   const actions = todayActions(now);
   const alerts = allDealAlerts(now);
   const docAlerts = documentExpiryAlerts(now);
+  const reviews = dealsNeedingReview(now);
 
   return (
     <div className="space-y-6">
@@ -99,6 +100,21 @@ export default function CeoPage() {
           )}
         </Panel>
       </div>
+
+      {reviews.length > 0 && (
+        <Panel title="Revue humaine requise">
+          <ul className="space-y-1.5">
+            {reviews.map((r) => (
+              <li key={r.dealId} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                <span className="font-medium">{r.title}</span>
+                <span className="text-xs" style={{ color: "var(--red)" }}>
+                  {r.reasons.join(" · ")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
 
       <Panel title="Vue rapide" right={<span className="text-xs muted">Légende priorités</span>}>
         <div className="flex flex-wrap gap-2">

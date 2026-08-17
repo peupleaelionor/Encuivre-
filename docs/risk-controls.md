@@ -14,6 +14,24 @@ faut. Il ne prétend pas remplacer un contrôle de conformité réel.
 `requiresHumanReview()` (`lib/risk.ts`) force une revue humaine pour les flags bloquants
 (sanctions, changement de compte bancaire, revue manuelle, document expiré).
 
+### Détection automatique — `deriveRiskFlags()`
+
+`deriveRiskFlags()` (`lib/risk.ts`) dérive des flags **explicables** depuis une offre /
+un deal / une société :
+
+- `UNVERIFIED_COMPANY` — contrepartie non vérifiée.
+- `PRICE_TOO_GOOD` — prix < 70 % de la référence marché (`lib/market.ts`) : signal de fraude.
+- `MISSING_COA` / `MISSING_ORIGIN` — documents requis absents (matière raffinée / flux transfrontalier).
+- `INCONSISTENT_QUANTITY` — quantité ≤ 0 ou au-delà de la capacité fournisseur.
+- `DOCUMENT_EXPIRED` — un document rattaché est expiré.
+- `MANUAL_REVIEW` — pays inconnu, **ou** corridor Congo (V1) avec contrepartie non vérifiée.
+
+Le moteur ne **fabrique jamais** une correspondance de sanctions : `SANCTIONS_REVIEW_REQUIRED`
+n'est conservé que s'il a déjà été posé manuellement sur le deal. Le CEO Command Center
+affiche « Revue humaine requise » pour les deals ouverts concernés ; l'état documentaire
+est visible sur `/documents`. Les prix de référence (`lib/market.ts`) sont des ancrages
+grossiers, **jamais** une source de vérité financière.
+
 ## Sanctions screening — NON implémenté (volontairement)
 
 **Aucune** solution automatique de screening de sanctions n'est fournie. Le flag
