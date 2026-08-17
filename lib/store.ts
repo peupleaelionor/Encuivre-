@@ -1,10 +1,10 @@
 /**
  * Repository abstraction over the data source.
  *
- * V1 backs this with the in-repo typed seed dataset (lib/seed). The interface is
- * deliberately narrow and synchronous-friendly so a real async database
- * (Prisma/Postgres) can replace `SeedRepository` later without touching the UI
- * or the engines. See docs/copilot-audit.md ("Dette volontaire").
+ * The default `repo` is now backed by a real SQLite database (better-sqlite3),
+ * seeded on first run from the typed dataset in `lib/seed`. The synchronous
+ * contract is unchanged, so pages and engines are untouched. See
+ * `lib/db/*` and `docs/database.md`.
  */
 
 import type {
@@ -18,8 +18,8 @@ import type {
   SellOffer,
   TrackedDocument,
 } from "./types";
-import * as seed from "./seed";
 
+/** Read side of the data source. */
 export interface Repository {
   companies(): Company[];
   company(id: string): Company | undefined;
@@ -34,43 +34,21 @@ export interface Repository {
   decisions(): Decision[];
 }
 
-class SeedRepository implements Repository {
-  companies() {
-    return seed.companies;
-  }
-  company(id: string) {
-    return seed.companies.find((c) => c.id === id);
-  }
-  contacts() {
-    return seed.contacts;
-  }
-  sellOffers() {
-    return seed.sellOffers;
-  }
-  buyRequests() {
-    return seed.buyRequests;
-  }
-  deals() {
-    return seed.deals;
-  }
-  deal(id: string) {
-    return seed.deals.find((d) => d.id === id);
-  }
-  documents() {
-    return seed.documents;
-  }
-  followUps() {
-    return seed.followUps;
-  }
-  quotes() {
-    return seed.quotes;
-  }
-  decisions() {
-    return seed.decisions;
-  }
+/** Write side — kept minimal and explicit. */
+export interface WritableRepository extends Repository {
+  createSellOffer(input: Omit<SellOffer, "id" | "createdAt">): SellOffer;
+  createBuyRequest(input: Omit<BuyRequest, "id" | "createdAt">): BuyRequest;
+  createDeal(input: Omit<Deal, "id" | "createdAt">): Deal;
+  createQuote(input: Omit<Quote, "id" | "createdAt">): Quote;
+  createDecision(input: Omit<Decision, "id" | "createdAt">): Decision;
+  updateDealStage(id: string, stage: Deal["stage"]): Deal | undefined;
 }
 
-export const repo: Repository = new SeedRepository();
+// The SQLite-backed implementation is the single source of truth at runtime.
+// Imported lazily-safe: repository.ts only type-imports from this module.
+import { sqliteRepo } from "./db/repository";
+
+export const repo: WritableRepository = sqliteRepo;
 
 // Convenience re-exports for company-role filtering.
 export function suppliers(r: Repository = repo): Company[] {

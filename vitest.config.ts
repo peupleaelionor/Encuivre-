@@ -10,5 +10,9 @@ export default defineConfig({
   test: {
     include: ["tests/**/*.test.ts"],
     environment: "node",
+    // Hermetic, file-less database for tests.
+    env: {
+      ENCUIVRE_DB_PATH: ":memory:",
+    },
   },
 });

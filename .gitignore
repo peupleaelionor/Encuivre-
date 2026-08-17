@@ -30,3 +30,10 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local database (regenerated + reseeded on first run)
+/data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
