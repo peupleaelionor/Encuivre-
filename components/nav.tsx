@@ -40,6 +40,17 @@ const SECTIONS: { label: string; items: { href: string; label: string }[] }[] = 
   },
 ];
 
+const PORTAL_SECTIONS: { label: string; items: { href: string; label: string }[] }[] = [
+  {
+    label: "Mon espace",
+    items: [
+      { href: "/portal", label: "Tableau de bord" },
+      { href: "/portal/offers/new", label: "Proposer une offre (RFO)" },
+      { href: "/portal/requests/new", label: "Soumettre une demande (RFQ)" },
+    ],
+  },
+];
+
 const MOBILE: { href: string; label: string }[] = [
   { href: "/ceo", label: "Today" },
   { href: "/focus", label: "Deals" },
@@ -47,19 +58,29 @@ const MOBILE: { href: string; label: string }[] = [
   { href: "/quotes/new", label: "Devis" },
 ];
 
-export function Sidebar() {
+const PORTAL_MOBILE: { href: string; label: string }[] = [
+  { href: "/portal", label: "Accueil" },
+  { href: "/portal/offers/new", label: "Offre" },
+  { href: "/portal/requests/new", label: "Demande" },
+];
+
+export function Sidebar({ internal = true }: { internal?: boolean }) {
   const pathname = usePathname();
   if (pathname === "/login") return null;
+  const sections = internal ? SECTIONS : PORTAL_SECTIONS;
+  const home = internal ? "/ceo" : "/portal";
   return (
     <aside className="hidden w-64 shrink-0 border-r p-4 md:block" style={{ borderColor: "var(--border)" }}>
-      <Link href="/ceo" className="mb-6 block">
+      <Link href={home} className="mb-6 block">
         <div className="text-lg font-bold tracking-tight">
           EN CUIVRE <span style={{ color: "var(--copper-light)" }}>OS</span>
         </div>
-        <div className="text-xs muted">Le système se souvient. Le PDG décide.</div>
+        <div className="text-xs muted">
+          {internal ? "Le système se souvient. Le PDG décide." : "Portail contrepartie"}
+        </div>
       </Link>
       <nav className="space-y-5">
-        {SECTIONS.map((section) => (
+        {sections.map((section) => (
           <div key={section.label}>
             <div className="mb-1 text-xs font-semibold uppercase tracking-wide muted">
               {section.label}
@@ -90,15 +111,16 @@ export function Sidebar() {
   );
 }
 
-export function MobileBar() {
+export function MobileBar({ internal = true }: { internal?: boolean }) {
   const pathname = usePathname();
   if (pathname === "/login") return null;
+  const items = internal ? MOBILE : PORTAL_MOBILE;
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-10 flex border-t md:hidden"
       style={{ borderColor: "var(--border)", background: "var(--panel)" }}
     >
-      {MOBILE.map((item) => {
+      {items.map((item) => {
         const active = pathname === item.href;
         return (
           <Link
