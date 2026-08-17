@@ -36,13 +36,18 @@ Aucun achat n'est recommandé « à l'aveugle » : voir `lib/buy-opportunities.t
 
 ## 4. Architecture
 
-- **Stack** : Next.js 15 (App Router) · React 19 · TypeScript strict · Tailwind CSS 3 · Vitest.
-- **Domaine pur** : toute la logique métier vit dans `lib/*.ts`, sans dépendance UI,
-  et est **testée** (`tests/*.test.ts`). Les pages ne font qu'afficher.
-- **Persistance V1** : dataset typé en dépôt (`lib/seed`) exposé via une **abstraction
-  repository** (`lib/store.ts`, interface `Repository`). Aucune base externe requise.
-  Pour brancher une vraie DB (Prisma/Postgres), implémenter `Repository` sans toucher
-  aux pages ni aux moteurs. Voir `docs/copilot-audit.md` (dette volontaire).
+- **Stack** : Next.js 15 (App Router) · React 19 · TypeScript strict · Tailwind CSS 3 ·
+  **Drizzle ORM + PostgreSQL** · Vitest.
+- **Domaine pur** : toute la logique métier vit dans `lib/*.ts`, sans dépendance UI **ni
+  ORM**, et est **testée** (`tests/*.test.ts`). Les pages ne font qu'afficher.
+- **Persistance** : PostgreSQL via l'abstraction `Repository` / `WritableRepository`
+  (`lib/store.ts`), implémentée par `PostgresRepository` (`lib/db/*`, Drizzle). **PGlite**
+  (Postgres embarqué) en dev/test/CI ; **Postgres** (`DATABASE_URL`) en prod. Migrations
+  versionnées + seed depuis `lib/seed`. Voir `docs/database.md`, `docs/adr/001`.
+- **Auth & multi-tenant** : `lib/auth/*` — sessions serveur signées (scrypt + cookie
+  httpOnly), `Organization`/`Membership`, **RBAC centralisé** `can(user, action, resource)`
+  (`lib/auth/rbac.ts`). Autorisation appliquée dans `lib/services/*` (jamais « bouton
+  caché »). Middleware = 1er verrou. Voir `docs/adr/002`, `docs/V2-ARCHITECTURE.md`.
 - **Money** : `lib/money.ts` — **centimes entiers uniquement, jamais de float naïf**.
 
 Modules clés :
@@ -59,7 +64,13 @@ Modules clés :
 | `lib/buy-opportunities.ts` | « Que dois-je acheter ? » (BUY/WATCH/AVOID). |
 | `lib/follow-ups.ts` | Buckets Today/Overdue/7j/No-activity + alertes. |
 | `lib/risk.ts` | Expiration documents + revue humaine forcée. |
-| `lib/dashboard.ts` | Agrégation KPIs CEO, focus, à-faire-aujourd'hui. |
+| `lib/dashboard.ts` | Agrégation KPIs CEO (async). |
+| `lib/store.ts` · `lib/db/*` | Repository async + Drizzle/Postgres (schema, migrations, seed). |
+| `lib/auth/*` | Sessions, RBAC `can()`, matrice de rôles. |
+| `lib/services/*` | Frontière d'autorisation (lectures/écritures scoping-safe). |
+
+**Règle async** : le `Repository` est asynchrone ; les pages/services `await`. Les moteurs
+restent **purs et synchrones** (ils reçoivent des tableaux, n'importent jamais l'ORM).
 
 ## 5. Commandes
 
@@ -69,9 +80,17 @@ npm run dev       # dev server (http://localhost:3000)
 npm run build     # build de production
 npm run lint      # ESLint (next lint)
 npm run typecheck # tsc --noEmit
-npm test          # vitest run (tests unitaires)
-npm run seed      # imprime un résumé du dataset de démo (validation seed)
+npm test          # vitest run (unit + DB/permission tests, sur PGlite)
+npm run seed      # résumé du dataset lu DEPUIS la base (validation)
+npm run db:generate  # génère les migrations SQL (drizzle-kit) après un changement de schéma
+npm run db:embed     # ré-embarque les migrations dans lib/db/migrations-sql.ts
+npm run db:migrate   # applique les migrations à DATABASE_URL (déploiement)
 ```
+
+**Auth (dev)** : `/login` — comptes de démo, mot de passe `encuivre`
+(`ceo@encuivre.example`, `finance@…`, `compliance@…`, `contact@metalsud.example`,
+`achat@cableplus.example`). Sans `DATABASE_URL`, l'app utilise PGlite (base en mémoire ou
+`ENCUIVRE_DB_PATH`).
 
 **Critère de fin de toute tâche** : `lint`, `typecheck`, `test` et `build` passent.
 
