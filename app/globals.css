@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0b0b0d;
+  --panel: #15151a;
+  --panel-2: #1d1d24;
+  --border: #2a2a33;
+  --text: #f4f1ee;
+  --muted: #a3a1aa;
+  --copper: #b45309;
+  --copper-light: #e28d5c;
+  --green: #16a34a;
+  --amber: #d97706;
+  --red: #dc2626;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border p-4;
+    background: var(--panel);
+    border-color: var(--border);
+  }
+  .panel-2 {
+    background: var(--panel-2);
+    border-color: var(--border);
+  }
+  .muted {
+    color: var(--muted);
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+    border: 1px solid var(--border);
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors;
+    background: var(--copper);
+    color: white;
+  }
+  .btn:hover {
+    background: #8f3f0a;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium;
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .kpi-value {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+  .table-wrap {
+    @apply w-full overflow-x-auto;
+  }
+  .th {
+    @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide;
+    color: var(--muted);
+  }
+  .td {
+    @apply px-3 py-2 text-sm align-middle;
+    border-top: 1px solid var(--border);
+  }
+}
