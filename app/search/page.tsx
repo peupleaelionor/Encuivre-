@@ -1,12 +1,15 @@
-"use client";
-
-import { useMemo, useState } from "react";
 import Link from "next/link";
 import { globalSearch } from "@/lib/search";
 
-export default function SearchPage() {
-  const [q, setQ] = useState("");
-  const hits = useMemo(() => globalSearch(q), [q]);
+export const dynamic = "force-dynamic";
+
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q = "" } = await searchParams;
+  const hits = q.trim() ? globalSearch(q) : [];
 
   return (
     <div className="space-y-6">
@@ -15,17 +18,22 @@ export default function SearchPage() {
         <p className="muted text-sm">Sociétés, contacts, matières, deals, offres, demandes.</p>
       </header>
 
-      <input
-        autoFocus
-        className="w-full rounded-lg px-3 py-2 text-sm"
-        style={{ background: "var(--panel-2)", border: "1px solid var(--border)", color: "var(--text)" }}
-        placeholder="Rechercher…"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-      />
+      <form method="GET" className="flex gap-2">
+        <input
+          autoFocus
+          name="q"
+          defaultValue={q}
+          className="w-full rounded-lg px-3 py-2 text-sm"
+          style={{ background: "var(--panel-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+          placeholder="Rechercher…"
+        />
+        <button className="btn" type="submit">
+          Chercher
+        </button>
+      </form>
 
       {q.trim() === "" ? (
-        <p className="muted text-sm">Tapez pour rechercher.</p>
+        <p className="muted text-sm">Tapez un terme puis « Chercher ».</p>
       ) : hits.length === 0 ? (
         <p className="muted text-sm">Aucun résultat pour « {q} ».</p>
       ) : (

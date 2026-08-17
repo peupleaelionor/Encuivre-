@@ -51,8 +51,9 @@ Next.js 15 (App Router) · React 19 · TypeScript strict · Tailwind CSS 3 · Vi
 
 - Toute la **logique métier** est pure et testée dans `lib/*.ts`.
 - **Argent** en centimes entiers (`lib/money.ts`), jamais de float naïf.
-- **Persistance V1** : dataset typé (`lib/seed`) derrière une abstraction repository
-  (`lib/store.ts`) — une vraie base peut être branchée sans toucher à l'UI.
+- **Persistance** : base **SQLite** (`better-sqlite3`) avec migrations et seeding auto,
+  derrière `Repository` / `WritableRepository` (`lib/store.ts`, `lib/db/*`). Écriture via
+  server actions (`app/actions.ts`). Voir [`docs/database.md`](./docs/database.md).
 
 Détails : voir [`CLAUDE.md`](./CLAUDE.md) et [`docs/`](./docs).
 
@@ -62,6 +63,7 @@ Détails : voir [`CLAUDE.md`](./CLAUDE.md) et [`docs/`](./docs).
 - [`docs/trade-workflow.md`](./docs/trade-workflow.md) — flux Trade.
 - [`docs/circular-workflow.md`](./docs/circular-workflow.md) — flux Circular.
 - [`docs/ceo-operating-system.md`](./docs/ceo-operating-system.md) — logique CEO OS.
+- [`docs/database.md`](./docs/database.md) — base de données & couche d'écriture.
 - [`docs/risk-controls.md`](./docs/risk-controls.md) — sécurité & risques.
 - [`docs/copilot-audit.md`](./docs/copilot-audit.md) — audit de l'existant.
 - [`docs/github-protection.md`](./docs/github-protection.md) — protection de branche & CI.

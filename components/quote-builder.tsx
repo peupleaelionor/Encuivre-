@@ -6,6 +6,7 @@ import { calculateQuote } from "@/lib/pricing";
 import { evaluateMarginGuard, type MarginGuardThresholds } from "@/lib/margin-guard";
 import { VerdictBadge } from "@/components/ui";
 import { MATERIAL_LABELS, MVP_MATERIALS, GRADES } from "@/lib/enums";
+import { saveQuoteAction } from "@/app/actions";
 
 interface Option {
   id: string;
@@ -169,9 +170,23 @@ export function QuoteBuilder({
               ))}
             </ul>
           )}
-          <button className="btn mt-3" type="button" disabled={!guard.canValidate}>
-            {guard.canValidate ? "Passer en QUOTED" : "Marge insuffisante"}
-          </button>
+          <form action={saveQuoteAction} className="mt-3">
+            <input type="hidden" name="supplierId" value={supplierId} />
+            <input type="hidden" name="buyerId" value={buyerId} />
+            <input type="hidden" name="material" value={material} />
+            <input type="hidden" name="grade" value={grade} />
+            <input type="hidden" name="quantityKg" value={quantityKg} />
+            <input type="hidden" name="purchase" value={purchase} />
+            <input type="hidden" name="transport" value={transport} />
+            <input type="hidden" name="insurance" value={insurance} />
+            <input type="hidden" name="customs" value={customs} />
+            <input type="hidden" name="financing" value={financing} />
+            <input type="hidden" name="other" value={other} />
+            <input type="hidden" name="margin" value={margin} />
+            <button className="btn" type="submit" disabled={!guard.canValidate}>
+              {guard.canValidate ? "Enregistrer le devis" : "Marge insuffisante"}
+            </button>
+          </form>
         </div>
       </section>
 

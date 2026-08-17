@@ -51,15 +51,22 @@ Intelligence, Contact Memory, Follow-up engine, Quote Builder, Margin Guard,
 Buy-opportunities, Academy, Glossaire, Decision log, Document readiness, Risk flags,
 Global search, Mobile CEO mode, seeds réalistes, tests, CI, documentation.
 
+## Livré depuis (itérations suivantes)
+
+- **Détection automatique des risk flags** + page Document Readiness (`/documents`).
+- **Base de données réelle SQLite** (`better-sqlite3`) avec migrations versionnées et
+  seeding automatique, derrière `Repository` (voir `docs/database.md`).
+- **Couche d'écriture** : `WritableRepository` + server actions — création d'offres, de
+  demandes, de deals (depuis un match) et de devis (avec Margin Guard serveur autoritaire).
+
 ## Dette volontaire (reportée en connaissance de cause)
 
-1. **Base de données réelle** (Prisma/Postgres + migrations SQL). L'interface
-   `Repository` est prête ; il suffit d'en fournir une implémentation.
+1. **Base de production managée** (Postgres) pour l'hébergement serverless : réimplémenter
+   `SqliteRepository` derrière la même interface (aucun changement UI/moteurs).
 2. **Authentification / RBAC** externe.
-3. **Écriture** (créer/éditer deals, offres, devis persistés). La V1 est en lecture sur
-   un dataset seedé ; les moteurs de calcul, eux, sont complets et testés.
-4. **Tests E2E Playwright** : la logique critique est couverte en unitaire ; les E2E
-   (login, création offre/demande/devis/deal) sont à ajouter quand l'écriture existe.
+3. **Édition/suppression** avancée (la création est faite ; update se limite à l'étape du deal).
+4. **Tests E2E Playwright** (login, création offre/demande/devis/deal) : la logique et la
+   persistance sont couvertes en unitaire ; les E2E navigateur restent à ajouter.
 5. **Corridor RDC avancé** : volontairement minimal en V1 (aucun workflow sensible).
 
 ## Vérifications exécutées

@@ -39,10 +39,13 @@ Aucun achat n'est recommandé « à l'aveugle » : voir `lib/buy-opportunities.t
 - **Stack** : Next.js 15 (App Router) · React 19 · TypeScript strict · Tailwind CSS 3 · Vitest.
 - **Domaine pur** : toute la logique métier vit dans `lib/*.ts`, sans dépendance UI,
   et est **testée** (`tests/*.test.ts`). Les pages ne font qu'afficher.
-- **Persistance V1** : dataset typé en dépôt (`lib/seed`) exposé via une **abstraction
-  repository** (`lib/store.ts`, interface `Repository`). Aucune base externe requise.
-  Pour brancher une vraie DB (Prisma/Postgres), implémenter `Repository` sans toucher
-  aux pages ni aux moteurs. Voir `docs/copilot-audit.md` (dette volontaire).
+- **Persistance** : base **SQLite** (`better-sqlite3`, synchrone) derrière l'abstraction
+  `Repository` / `WritableRepository` (`lib/store.ts`). Migrations versionnées
+  (`lib/db/migrations.ts`), seed au premier accès depuis `lib/seed`. Chemin configurable
+  via `ENCUIVRE_DB_PATH` (`:memory:` en test). Voir `docs/database.md`. Pour un hébergement
+  serverless, réimplémenter `SqliteRepository` avec Postgres derrière la même interface.
+- **Écriture** : `app/actions.ts` (`"use server"`) — créer offre/demande/deal/devis. Les
+  calculs financiers d'un devis sont **re-exécutés côté serveur** (le client ne fait pas foi).
 - **Money** : `lib/money.ts` — **centimes entiers uniquement, jamais de float naïf**.
 
 Modules clés :
@@ -60,6 +63,9 @@ Modules clés :
 | `lib/follow-ups.ts` | Buckets Today/Overdue/7j/No-activity + alertes. |
 | `lib/risk.ts` | Expiration documents + revue humaine forcée. |
 | `lib/dashboard.ts` | Agrégation KPIs CEO, focus, à-faire-aujourd'hui. |
+| `lib/store.ts` | Interfaces `Repository` / `WritableRepository`, singleton `repo`. |
+| `lib/db/*` | SQLite : migrations, connexion, mappers, seeder, `SqliteRepository`. |
+| `app/actions.ts` | Server actions d'écriture (offre, demande, deal, devis). |
 
 ## 5. Commandes
 

@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { Empty, Panel, ScorePill } from "@/components/ui";
 import { findMatches } from "@/lib/matching";
 import { MATERIAL_LABELS } from "@/lib/enums";
 import { formatEur, formatQuantity } from "@/lib/money";
 import { repo } from "@/lib/store";
+import { createDealFromMatchAction } from "@/app/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +15,15 @@ export default function QuickSalesPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">Quick Sales</h1>
-        <p className="muted text-sm">Que puis-je vendre rapidement ? (offre ↔ demande, marge positive)</p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Quick Sales</h1>
+          <p className="muted text-sm">Que puis-je vendre rapidement ? (offre ↔ demande, marge positive)</p>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/offers/new" className="btn-ghost text-xs">+ Offre</Link>
+          <Link href="/requests/new" className="btn-ghost text-xs">+ Demande</Link>
+        </div>
       </header>
 
       <Panel title={`${matches.length} match(s) exploitable(s)`}>
@@ -65,9 +73,13 @@ export default function QuickSalesPage() {
                       </span>
                     </td>
                     <td className="td">
-                      <button className="btn text-xs" type="button">
-                        Créer un deal
-                      </button>
+                      <form action={createDealFromMatchAction}>
+                        <input type="hidden" name="offerId" value={m.offer.id} />
+                        <input type="hidden" name="requestId" value={m.request.id} />
+                        <button className="btn text-xs" type="submit">
+                          Créer un deal
+                        </button>
+                      </form>
                     </td>
                   </tr>
                 ))}
@@ -77,8 +89,8 @@ export default function QuickSalesPage() {
         )}
       </Panel>
       <p className="text-xs muted">
-        Règle : un fournisseur BLOQUÉ n&apos;apparaît jamais ici. Le bouton « Créer un deal » est câblé
-        pour la V2 (persistance).
+        Règle : un fournisseur BLOQUÉ n&apos;apparaît jamais ici. « Créer un deal » enregistre un deal
+        en base (étape QUALIFIED) à partir du match.
       </p>
     </div>
   );
