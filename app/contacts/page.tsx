@@ -3,8 +3,9 @@ import { repo } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export default function ContactsPage() {
-  const contacts = repo.contacts();
+export default async function ContactsPage() {
+  const [contacts, companies] = await Promise.all([repo.contacts(), repo.companies()]);
+  const byId = new Map(companies.map((c) => [c.id, c]));
 
   return (
     <div className="space-y-6">
@@ -18,7 +19,7 @@ export default function ContactsPage() {
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {contacts.map((ct) => {
-            const company = repo.company(ct.companyId);
+            const company = byId.get(ct.companyId);
             const m = ct.memory;
             return (
               <Panel key={ct.id}>

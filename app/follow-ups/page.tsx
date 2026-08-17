@@ -5,10 +5,14 @@ import type { FollowUp } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export default function FollowUpsPage() {
+export default async function FollowUpsPage() {
   const now = new Date();
-  const b = followUpBuckets(now);
-  const alerts = allDealAlerts(now);
+  const [b, alerts, companies] = await Promise.all([
+    followUpBuckets(now),
+    allDealAlerts(now),
+    repo.companies(),
+  ]);
+  const names = new Map(companies.map((c) => [c.id, c.displayName]));
 
   return (
     <div className="space-y-6">
@@ -18,10 +22,10 @@ export default function FollowUpsPage() {
       </header>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Bucket title="Aujourd'hui" items={b.today} />
-        <Bucket title="En retard" items={b.overdue} danger />
-        <Bucket title="7 prochains jours" items={b.next7Days} />
-        <Bucket title="Sans activité" items={b.noActivity} />
+        <Bucket title="Aujourd'hui" items={b.today} names={names} />
+        <Bucket title="En retard" items={b.overdue} names={names} danger />
+        <Bucket title="7 prochains jours" items={b.next7Days} names={names} />
+        <Bucket title="Sans activité" items={b.noActivity} names={names} />
       </div>
 
       <Panel title="Alertes automatiques">
@@ -44,7 +48,17 @@ export default function FollowUpsPage() {
   );
 }
 
-function Bucket({ title, items, danger }: { title: string; items: FollowUp[]; danger?: boolean }) {
+function Bucket({
+  title,
+  items,
+  names,
+  danger,
+}: {
+  title: string;
+  items: FollowUp[];
+  names: Map<string, string>;
+  danger?: boolean;
+}) {
   return (
     <Panel title={`${title} (${items.length})`}>
       {items.length === 0 ? (
@@ -52,12 +66,11 @@ function Bucket({ title, items, danger }: { title: string; items: FollowUp[]; da
       ) : (
         <ul className="space-y-2">
           {items.map((f) => {
-            const company = repo.company(f.companyId);
             return (
               <li key={f.id} className="panel panel-2 flex items-center justify-between gap-2">
                 <div>
                   <div className="text-sm font-medium">{f.action}</div>
-                  <div className="text-xs muted">{company?.displayName ?? f.companyId}</div>
+                  <div className="text-xs muted">{names.get(f.companyId) ?? f.companyId}</div>
                 </div>
                 <LevelBadge level={f.priority} />
               </li>

@@ -4,9 +4,10 @@ import { buyers, suppliers } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export default function NewQuotePage() {
-  const supplierOptions = suppliers().map((c) => ({ id: c.id, label: c.displayName }));
-  const buyerOptions = buyers().map((c) => ({ id: c.id, label: c.displayName }));
+export default async function NewQuotePage() {
+  const [supplierList, buyerList] = await Promise.all([suppliers(), buyers()]);
+  const supplierOptions = supplierList.map((c) => ({ id: c.id, label: c.displayName }));
+  const buyerOptions = buyerList.map((c) => ({ id: c.id, label: c.displayName }));
   const thresholds = marginThresholdsFromEnv();
 
   return (

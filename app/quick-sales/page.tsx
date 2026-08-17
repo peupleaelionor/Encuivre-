@@ -6,10 +6,13 @@ import { repo } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export default function QuickSalesPage() {
-  const matches = findMatches(repo.sellOffers(), repo.buyRequests(), repo.companies(), {
-    minCompatibility: 30,
-  });
+export default async function QuickSalesPage() {
+  const [offers, requests, companies] = await Promise.all([
+    repo.sellOffers(),
+    repo.buyRequests(),
+    repo.companies(),
+  ]);
+  const matches = findMatches(offers, requests, companies, { minCompatibility: 30 });
 
   return (
     <div className="space-y-6">

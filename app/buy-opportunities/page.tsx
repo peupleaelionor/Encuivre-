@@ -12,12 +12,16 @@ const REC_COLOR: Record<BuyRecommendation, string> = {
   AVOID: "var(--red)",
 };
 
-export default function BuyOpportunitiesPage() {
-  const requests = repo.buyRequests();
-  const results: BuyOpportunityResult[] = repo
-    .sellOffers()
+export default async function BuyOpportunitiesPage() {
+  const [requests, offers, companies] = await Promise.all([
+    repo.buyRequests(),
+    repo.sellOffers(),
+    repo.companies(),
+  ]);
+  const byId = new Map(companies.map((c) => [c.id, c]));
+  const results: BuyOpportunityResult[] = offers
     .map((offer) => {
-      const supplier = repo.company(offer.supplierId);
+      const supplier = byId.get(offer.supplierId);
       if (!supplier) return null;
       return classifyBuyOpportunity({ offer, requests, supplier });
     })
@@ -42,7 +46,7 @@ export default function BuyOpportunitiesPage() {
         ) : (
           <div className="space-y-2">
             {results.map((r) => {
-              const supplier = repo.company(r.offer.supplierId);
+              const supplier = byId.get(r.offer.supplierId);
               return (
                 <div key={r.offer.id} className="panel panel-2">
                   <div className="flex flex-wrap items-start justify-between gap-3">

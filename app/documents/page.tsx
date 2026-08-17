@@ -13,10 +13,9 @@ const STATUS_COLOR: Record<VerificationStatus, string> = {
   REJECTED: "var(--red)",
 };
 
-export default function DocumentsPage() {
+export default async function DocumentsPage() {
   const now = new Date();
-  const docs = repo.documents();
-  const expiry = documentExpiryAlerts(now);
+  const [docs, expiry] = await Promise.all([repo.documents(), documentExpiryAlerts(now)]);
   const expiredIds = new Set(expiry.filter((a) => a.status === "EXPIRED").map((a) => a.documentId));
   const expiringIds = new Set(
     expiry.filter((a) => a.status === "EXPIRING_SOON").map((a) => a.documentId),

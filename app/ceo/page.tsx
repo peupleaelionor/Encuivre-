@@ -5,13 +5,15 @@ import { documentExpiryAlerts } from "@/lib/risk";
 
 export const dynamic = "force-dynamic";
 
-export default function CeoPage() {
+export default async function CeoPage() {
   const now = new Date();
-  const kpis = ceoKpis(now);
-  const actions = todayActions(now);
-  const alerts = allDealAlerts(now);
-  const docAlerts = documentExpiryAlerts(now);
-  const reviews = dealsNeedingReview(now);
+  const [kpis, actions, alerts, docAlerts, reviews] = await Promise.all([
+    ceoKpis(now),
+    todayActions(now),
+    allDealAlerts(now),
+    documentExpiryAlerts(now),
+    dealsNeedingReview(now),
+  ]);
 
   return (
     <div className="space-y-6">

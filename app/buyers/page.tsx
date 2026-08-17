@@ -10,8 +10,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const daysSince = (iso?: string) =>
   iso ? Math.floor((Date.now() - new Date(iso).getTime()) / DAY_MS) : undefined;
 
-export default function BuyersPage() {
-  const rows = buyers()
+export default async function BuyersPage() {
+  const rows = (await buyers())
     .map((c) => ({ company: c, score: scoreBuyerCompany(c, daysSince(c.lastContactAt)) }))
     .sort((a, b) => b.score.score - a.score.score);
 

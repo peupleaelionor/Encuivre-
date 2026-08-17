@@ -6,8 +6,8 @@ import { suppliers } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export default function SuppliersPage() {
-  const rows = suppliers()
+export default async function SuppliersPage() {
+  const rows = (await suppliers())
     .map((c) => ({ company: c, score: scoreSupplierCompany(c) }))
     .sort(
       (a, b) =>

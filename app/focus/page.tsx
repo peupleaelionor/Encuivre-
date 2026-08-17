@@ -6,9 +6,10 @@ import { repo } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export default function FocusPage() {
+export default async function FocusPage() {
   const now = new Date();
-  const top3 = focusPriorities(now);
+  const [top3, companies] = await Promise.all([focusPriorities(now), repo.companies()]);
+  const byId = new Map(companies.map((c) => [c.id, c]));
 
   return (
     <div className="space-y-6">
@@ -24,8 +25,8 @@ export default function FocusPage() {
       ) : (
         <div className="space-y-4">
           {top3.map((d, i) => {
-            const buyer = repo.company(d.buyerId);
-            const supplier = d.supplierId ? repo.company(d.supplierId) : undefined;
+            const buyer = byId.get(d.buyerId);
+            const supplier = d.supplierId ? byId.get(d.supplierId) : undefined;
             const margin = marginPercent(dealValueCents(d), dealValueCents(d) - dealMarginCents(d));
             return (
               <Panel key={d.id} className="border-l-4" >
