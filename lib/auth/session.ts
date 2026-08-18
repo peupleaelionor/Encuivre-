@@ -32,10 +32,10 @@ function sign(payload: string): string {
   return createHmac("sha256", secret()).update(payload).digest("base64url");
 }
 
-/** Create a signed session token for a user id. */
-export function signSession(userId: string, now: number = Date.now()): string {
+/** Create a signed session token for a user id. `internal` marks internal-tenant users. */
+export function signSession(userId: string, internal = true, now: number = Date.now()): string {
   const exp = Math.floor(now / 1000) + MAX_AGE_SECONDS;
-  const payload = b64url(JSON.stringify({ sub: userId, exp }));
+  const payload = b64url(JSON.stringify({ sub: userId, int: internal, exp }));
   return `${payload}.${sign(payload)}`;
 }
 
@@ -65,9 +65,9 @@ export async function getCurrentUser(): Promise<AuthContext | null> {
   return loadContext(userId);
 }
 
-export async function setSessionCookie(userId: string): Promise<void> {
+export async function setSessionCookie(userId: string, internal = true): Promise<void> {
   const jar = await cookies();
-  jar.set(COOKIE, signSession(userId), {
+  jar.set(COOKIE, signSession(userId, internal), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

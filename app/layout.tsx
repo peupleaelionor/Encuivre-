@@ -5,6 +5,7 @@ import { MobileBar, Sidebar } from "@/components/nav";
 import { AppHeader, type HeaderOrg } from "@/components/app-header";
 import { getCurrentUser } from "@/lib/auth/session";
 import { organizationsByIds } from "@/lib/auth/queries";
+import { isInternalUser } from "@/lib/auth/rbac";
 import { ACTIVE_ORG_COOKIE } from "@/lib/auth/constants";
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getCurrentUser();
+  const internal = ctx ? isInternalUser(ctx) : true;
   let orgs: HeaderOrg[] = [];
   let activeOrgId: string | undefined;
 
@@ -34,7 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="fr">
       <body>
         <div className="flex min-h-screen">
-          <Sidebar />
+          <Sidebar internal={internal} />
           <div className="flex flex-1 flex-col">
             {ctx && (
               <AppHeader
@@ -49,7 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </main>
           </div>
         </div>
-        <MobileBar />
+        <MobileBar internal={internal} />
       </body>
     </html>
   );

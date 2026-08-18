@@ -121,6 +121,8 @@ export interface Company {
 /** A supply available to sell (from a supplier or our own inventory). */
 export interface SellOffer {
   id: string;
+  /** Tenant that owns this record (INTERNAL, or a supplier portal tenant). */
+  ownerOrganizationId?: string;
   supplierId: string;
   material: Material;
   grade: Grade;
@@ -142,6 +144,8 @@ export interface SellOffer {
 /** A buyer's request to purchase. */
 export interface BuyRequest {
   id: string;
+  /** Tenant that owns this record (INTERNAL, or a buyer portal tenant). */
+  ownerOrganizationId?: string;
   buyerId: string;
   material: Material;
   /** Minimum acceptable grade. */

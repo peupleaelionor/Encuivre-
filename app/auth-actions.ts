@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { authenticate, setSessionCookie, clearSessionCookie } from "@/lib/auth/session";
+import { isInternalUser } from "@/lib/auth/rbac";
 import { ACTIVE_ORG_COOKIE } from "@/lib/auth/constants";
 
 export async function loginAction(formData: FormData): Promise<void> {
@@ -12,13 +13,14 @@ export async function loginAction(formData: FormData): Promise<void> {
   if (!ctx) {
     redirect("/login?error=1");
   }
-  await setSessionCookie(ctx.user.id);
+  const internal = isInternalUser(ctx);
+  await setSessionCookie(ctx.user.id, internal);
   // Default the active org to the first membership.
   const jar = await cookies();
   if (ctx.memberships[0]) {
     jar.set(ACTIVE_ORG_COOKIE, ctx.memberships[0].organizationId, { httpOnly: true, sameSite: "lax", path: "/" });
   }
-  redirect("/ceo");
+  redirect(internal ? "/ceo" : "/portal");
 }
 
 export async function logoutAction(): Promise<void> {

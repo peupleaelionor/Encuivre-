@@ -75,15 +75,17 @@ class PostgresRepository implements WritableRepository {
   // ---------- writes ----------
   async createSellOffer(input: Omit<SellOffer, "id" | "createdAt">): Promise<SellOffer> {
     const db = await getDb();
-    const offer: SellOffer = { ...input, id: prefixedId("so"), createdAt: new Date().toISOString() };
-    await db.insert(t.sellOffers).values({ ...offer, ownerOrganizationId: INTERNAL_ORG_ID });
+    const ownerOrganizationId = input.ownerOrganizationId ?? INTERNAL_ORG_ID;
+    const offer: SellOffer = { ...input, ownerOrganizationId, id: prefixedId("so"), createdAt: new Date().toISOString() };
+    await db.insert(t.sellOffers).values({ ...offer, ownerOrganizationId });
     return offer;
   }
 
   async createBuyRequest(input: Omit<BuyRequest, "id" | "createdAt">): Promise<BuyRequest> {
     const db = await getDb();
-    const request: BuyRequest = { ...input, id: prefixedId("br"), createdAt: new Date().toISOString() };
-    await db.insert(t.buyRequests).values({ ...request, ownerOrganizationId: INTERNAL_ORG_ID });
+    const ownerOrganizationId = input.ownerOrganizationId ?? INTERNAL_ORG_ID;
+    const request: BuyRequest = { ...input, ownerOrganizationId, id: prefixedId("br"), createdAt: new Date().toISOString() };
+    await db.insert(t.buyRequests).values({ ...request, ownerOrganizationId });
     return request;
   }
 

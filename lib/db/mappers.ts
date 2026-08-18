@@ -80,6 +80,7 @@ export function rowToContact(r: ContactRow): Contact {
 export function rowToSellOffer(r: SellOfferRow): SellOffer {
   return {
     id: r.id,
+    ownerOrganizationId: u(r.ownerOrganizationId),
     supplierId: r.supplierId,
     material: r.material,
     grade: r.grade,
@@ -98,6 +99,7 @@ export function rowToSellOffer(r: SellOfferRow): SellOffer {
 export function rowToBuyRequest(r: BuyRequestRow): BuyRequest {
   return {
     id: r.id,
+    ownerOrganizationId: u(r.ownerOrganizationId),
     buyerId: r.buyerId,
     material: r.material,
     minGrade: r.minGrade,

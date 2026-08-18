@@ -9,11 +9,13 @@ PostgreSQL réel (Drizzle + PGlite/Postgres), migrations, seed DB, sessions serv
 organizations, memberships, RBAC centralisé, repository DB, services d'autorisation,
 tests DB + permissions. CEO Command Center et Quick Sales lisent la base.
 
-## Sprint 2 — Portails Buyer / Supplier + RFQ / RFO
+## Sprint 2 — Portails Buyer / Supplier + RFQ / RFO ✅
 
 Portails contrepartie scoping-safe (le fournisseur ne voit que ses offres ; l'acheteur
-ses demandes). Flux RFQ (demande de prix) / RFO (offre) structurés. Écriture côté
-portail (`ownerOrganizationId` = tenant contrepartie). Storage documentaire privé réel.
+ses demandes), routage par rôle au middleware, RFO/RFQ soumises au portail avec
+`ownerOrganizationId` = tenant contrepartie, deals expurgés (aucune marge interne).
+Voir `docs/portals.md`. **Reporté** : cycle de négociation RFQ→devis→acceptation,
+upload documentaire réel (storageKey), invitations d'utilisateurs de contrepartie.
 
 ## Sprint 3 — Marketplace + External Leads + Radar
 
